@@ -1,142 +1,248 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/AxiosInterceptor";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState("1");
+  const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchProduct() {
       try {
+        setLoading(true);
         const response = await api.get(`products/${id}/`);
         setProduct(response.data);
       } catch (error) {
         console.error("Gagal mengambil data:", error);
+        alert("Produk tidak ditemukan");
+      } finally {
+        setLoading(false);
       }
     }
     fetchProduct();
   }, [id]);
 
   const handleAddToCart = async () => {
-    const parsedQty = parseInt(quantity, 10);
-    if (isNaN(parsedQty) || parsedQty < 1) {
+    if (quantity < 1) {
       alert("Masukkan jumlah yang valid.");
       return;
     }
 
     try {
+      setAddingToCart(true);
       await api.post("cart/", {
         product_id: product.id,
-        quantity: parsedQty,
+        quantity: quantity,
       });
       alert("Produk ditambahkan ke keranjang!");
       navigate("/cart");
     } catch (error) {
       console.error("Gagal menambahkan ke keranjang:", error);
       alert("Terjadi kesalahan saat menambahkan ke keranjang.");
+    } finally {
+      setAddingToCart(false);
     }
   };
 
-  const increaseQty = () => {
-    const newQty = parseInt(quantity || "1", 10) + 1;
-    setQuantity(newQty.toString());
-  };
+  const increaseQty = useCallback(() => {
+    setQuantity((prev) => prev + 1);
+  }, []);
 
-  const decreaseQty = () => {
-    const currentQty = parseInt(quantity || "1", 10);
-    if (currentQty > 1) {
-      setQuantity((currentQty - 1).toString());
-    }
-  };
+  const decreaseQty = useCallback(() => {
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  }, []);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     if (/^\d*$/.test(value)) {
-      setQuantity(value);
+      const numValue = parseInt(value) || 0;
+      setQuantity(numValue > 0 ? numValue : 1);
     }
+  }, []);
+
+  // Format price dengan diskon
+  const formatPrice = (price) => {
+    return parseFloat(price).toLocaleString("id-ID");
   };
 
-  const handleInputBlur = () => {
-    const parsed = parseInt(quantity, 10);
-    if (isNaN(parsed) || parsed < 1) {
-      setQuantity("1");
-    }
-  };
+  const hasDiscount =
+    product?.discounted_price &&
+    parseFloat(product.discounted_price) < parseFloat(product.price);
+
+  // Loading Skeleton
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <div className="flex flex-col md:flex-row gap-10">
+          {/* Image Skeleton */}
+          <div className="w-full md:w-1/2">
+            <div className="w-full h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+          </div>
+
+          {/* Content Skeleton */}
+          <div className="w-full md:w-1/2 space-y-4">
+            <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-6 bg-gray-200 rounded w-1/3 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+            <div className="h-12 bg-gray-200 rounded animate-pulse mt-8"></div>
+            <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-10 text-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">
+            Produk Tidak Ditemukan
+          </h2>
+          <p className="text-red-600 mb-4">
+            Produk yang Anda cari tidak tersedia.
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="bg-primary hover:bg-primary_light text-white px-6 py-2 rounded-lg"
+          >
+            Kembali ke Beranda
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      {product ? (
-        <div className="flex flex-col md:flex-row gap-10">
-          {/* Gambar Produk */}
-          <div className="w-full md:w-1/2">
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Gambar Produk */}
+        <div className="w-full md:w-1/2">
+          <div className="relative">
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-full h-auto object-cover rounded"
+              className="w-full h-auto object-cover rounded-lg shadow-md"
             />
+            {hasDiscount && (
+              <div className="absolute top-4 left-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                SALE
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Detail Produk */}
-          <div className="w-full md:w-1/2 flex flex-col justify-between">
-            {/* Header Produk */}
+        {/* Detail Produk */}
+        <div className="w-full md:w-1/2 flex flex-col justify-between">
+          {/* Header Produk */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              {product.name}
+            </h1>
+
+            {/* Harga */}
             <div className="mb-4">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {product.name}
-              </h1>
-              <p className="text-lg text-primary_light font-semibold mt-2">
-                Rp{parseFloat(product.price).toLocaleString("id-ID")}
-              </p>
-              <hr className="my-4" />
-              <p className="text-gray-500 text-sm">{product.description}</p>
+              {hasDiscount ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl font-bold text-gray-900">
+                    Rp{formatPrice(product.discounted_price)}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    Rp{formatPrice(product.price)}
+                  </span>
+                  <span className="bg-red-100 text-red-600 text-sm font-semibold px-2 py-1 rounded">
+                    {Math.round(
+                      (1 -
+                        parseFloat(product.discounted_price) /
+                          parseFloat(product.price)) *
+                        100
+                    )}
+                    % OFF
+                  </span>
+                </div>
+              ) : (
+                <span className="text-2xl font-bold text-gray-900">
+                  Rp{formatPrice(product.price)}
+                </span>
+              )}
             </div>
 
-            {/* Input Quantity + Tombol */}
-            <div className="flex flex-col gap-4 mt-6">
-              {/* Jumlah dan tombol Add */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-gray-300 rounded">
-                  <button
-                    onClick={decreaseQty}
-                    className="px-3 py-2 text-lg font-bold hover:bg-gray-100"
-                  >
-                    −
-                  </button>
-                  <input
-                    type="text"
-                    value={quantity}
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    className="w-12 text-center outline-none"
-                  />
-                  <button
-                    onClick={increaseQty}
-                    className="px-3 py-2 text-lg font-bold hover:bg-gray-100"
-                  >
-                    +
-                  </button>
-                </div>
+            <hr className="my-4" />
 
+            {/* Deskripsi */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Deskripsi Produk
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {product.description || "Tidak ada deskripsi tersedia."}
+              </p>
+            </div>
+          </div>
+
+          {/* Input Quantity + Tombol */}
+          <div className="flex flex-col gap-4 mt-6">
+            {/* Jumlah dan tombol Add */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-gray-300 rounded-lg">
                 <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-amber-900 hover:bg-amber-800 text-white py-3 px-6 font-semibold rounded"
+                  onClick={decreaseQty}
+                  disabled={quantity <= 1}
+                  className="px-4 py-3 text-lg font-bold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Kurangi jumlah"
                 >
-                  ADD TO CART
+                  −
+                </button>
+                <input
+                  type="text"
+                  value={quantity}
+                  onChange={handleInputChange}
+                  className="w-16 text-center outline-none border-x border-gray-300 py-3"
+                  aria-label="Jumlah produk"
+                />
+                <button
+                  onClick={increaseQty}
+                  className="px-4 py-3 text-lg font-bold hover:bg-gray-100 transition-colors"
+                  aria-label="Tambah jumlah"
+                >
+                  +
                 </button>
               </div>
 
-              {/* Tombol Buy Now */}
-              <button className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 rounded">
-                BUY IT NOW
+              <button
+                onClick={handleAddToCart}
+                disabled={addingToCart}
+                className="flex-1 bg-amber-900 hover:bg-amber-800 disabled:bg-amber-600 text-white py-3 px-6 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                {addingToCart ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Menambahkan...
+                  </>
+                ) : (
+                  "ADD TO CART"
+                )}
               </button>
             </div>
+
+            {/* Tombol Buy Now */}
+            <button
+              className="w-full bg-black hover:bg-black/80 text-white font-semibold py-3 rounded-lg transition-colors"
+              onClick={() => {
+                // Logic untuk langsung checkout
+                handleAddToCart();
+              }}
+            >
+              BUY IT NOW
+            </button>
           </div>
         </div>
-      ) : (
-        <p className="text-center">Loading...</p>
-      )}
+      </div>
     </div>
   );
 }
