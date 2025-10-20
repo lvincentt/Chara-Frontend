@@ -73,7 +73,7 @@ export default function ProductDetail() {
           {/* Gambar Produk */}
           <div className="w-full md:w-1/2">
             <img
-              src={product.image}
+              src={product.image_url}
               alt={product.name}
               className="w-full h-auto object-cover rounded"
             />

@@ -8,18 +8,26 @@ import Footer from "../components/Footer";
 export default function ProductList() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState("limited");
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
       try {
         let endpoint = "products/";
-        if (filter === "best") endpoint += "?is_best_seller=true";
-        else if (filter === "limited") endpoint += "?is_limited_edition=true";
-        else if (filter === "staff") endpoint += "?is_staff_picks=true";
+        const params = new URLSearchParams();
 
-        const response = await api.get(endpoint);
+        if (filter === "best") params.append("is_best_seller", "true");
+        else if (filter === "limited")
+          params.append("is_limited_edition", "true");
+        else if (filter === "staff") params.append("is_staff_picks", "true");
+
+        // ✅ Jika filter = "all", tidak usah append query params
+        const queryString = params.toString();
+        const response = await api.get(
+          queryString ? `${endpoint}?${queryString}` : endpoint
+        );
+
         setProducts(response.data);
       } catch (error) {
         console.error("Gagal mengambil data:", error);
@@ -30,6 +38,7 @@ export default function ProductList() {
   }, [filter]);
 
   const filterOptions = [
+    { label: "All", value: "all" },
     { label: "Limited Edition", value: "limited" },
     { label: "Best Sellers", value: "best" },
     { label: "Staff Picks", value: "staff" },
