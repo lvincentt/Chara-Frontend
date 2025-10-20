@@ -23,15 +23,15 @@ export default function Footer() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold">CHARRA</h3>
+              <h3 className="text-xl font-bold">CHARA</h3>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
-              Let Charra Take You On a Journey — Where Moonlight Meets
+              Let Chara Take You On a Journey — Where Moonlight Meets
               Melt-in-Your-Mouth Delight.
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://www.instagram.com/charra/"
+                href="https://www.instagram.com/chara/"
                 className="w-10 h-10 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors duration-200"
               >
                 <svg
@@ -79,7 +79,7 @@ export default function Footer() {
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                <span>charra@gmail.com</span>
+                <span>chara@gmail.com</span>
               </div>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-400 text-sm">
-                &copy; 2025 CHARRA. Semua hak dilindungi undang-undang.
+                &copy; 2025 CHARA. Semua hak dilindungi undang-undang.
               </p>
             </div>
             <div className="flex space-x-6 text-sm">

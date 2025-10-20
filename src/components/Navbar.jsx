@@ -44,7 +44,7 @@ export default function Navbar() {
           to="/"
           className="font-playfair text-primary lg:text-4xl font-bold hover:text-primary_light transition text-2xl"
         >
-          CHARRA
+          CHARA
         </Link>
 
         {user ? (
