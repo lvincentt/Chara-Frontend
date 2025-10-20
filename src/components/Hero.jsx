@@ -17,22 +17,22 @@ export default function Hero() {
         {/* IMAGE SECTION */}
         <div className="md:w-1/2 grid grid-cols-2 gap-6">
           <img
-            src="/image/1.webp"
+            src="/image/foto1.jpeg"
             alt="Sweet 1"
             className="rounded-xl shadow-lg object-cover w-full h-52 md:h-64"
           />
           <img
-            src="/image/2.heic"
+            src="/image/foto2.jpg"
             alt="Sweet 2"
             className="rounded-xl shadow-lg object-cover w-full h-52 md:h-64"
           />
           <img
-            src="/image/3.heic"
+            src="/image/foto3.jpeg"
             alt="Sweet 3"
             className="rounded-xl shadow-lg object-cover w-full h-52 md:h-64"
           />
           <img
-            src="/image/4.heic"
+            src="/image/foto4.jpeg"
             alt="Sweet 4"
             className="rounded-xl shadow-lg object-cover w-full h-52 md:h-64"
           />
