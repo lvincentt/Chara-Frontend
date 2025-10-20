@@ -22,7 +22,6 @@ export default function ProductList() {
           params.append("is_limited_edition", "true");
         else if (filter === "staff") params.append("is_staff_picks", "true");
 
-        // ✅ Jika filter = "all", tidak usah append query params
         const queryString = params.toString();
         const response = await api.get(
           queryString ? `${endpoint}?${queryString}` : endpoint
@@ -72,7 +71,7 @@ export default function ProductList() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map((product) => (
-              <Link to={`/${product.id}`} key={product.id}>
+              <Link to={`/product/${product.id}`} key={product.id}>
                 <ProductCard product={product} />
               </Link>
             ))}

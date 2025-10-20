@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -12,26 +12,22 @@ import { CartProvider } from "./context/CartContext";
 
 function App() {
   return (
-    <div>
-      <BrowserRouter>
-        <AuthProvider>
-          <CartProvider>
-            <Navbar />
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<ProductList />} />
-              <Route path="/:id" element={<ProductDetail />} />
+    <AuthProvider>
+      <CartProvider>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<ProductList />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-              <Route element={<ProtectedRoute />}>
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<OrderDetail />} />
-              </Route>
-            </Routes>
-          </CartProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </div>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<OrderDetail />} />
+          </Route>
+        </Routes>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
